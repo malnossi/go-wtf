@@ -1,8 +1,23 @@
 # go-wtf
 
-**Web Template Forms** — Automatically render HTML forms from Go struct tags.
+**Web Template Forms** — Pure semantic, styling-free, class-free, and wrapper-free HTML form generation from Go structs.
 
-`go-wtf` reads `form` struct tags on your Go structs and generates clean, accessible, styled HTML forms. It integrates seamlessly with Go's `html/template` engine via a custom `FuncMap`.
+`go-wtf` reads struct tags on your Go structs and generates clean, accessible HTML5 forms. It integrates seamlessly with Go's `html/template` engine via a custom `FuncMap`, rendering standard inputs, textareas, selects, radios, and checkboxes with a simple `{{render_form .Form}}` template call.
+
+---
+
+## Features
+
+- 🌿 **Pure Semantic HTML**: Zero default CSS classes (no `.wtf-form` or `.wtf-form-input`) and absolutely no predefined stylesheets or styles.
+- 📦 **Flat & Wrapper-Free**: Labels and inputs are rendered directly next to each other in a flat HTML structure with **no wrapper `<div>` elements** (including checkboxes and radios).
+- 🔐 **Standard HTML5 Self-Closing Syntax**: Standard self-closing formatting (` />`) for all void tags like `<input>` (text, checkbox, radio, submit, reset, hidden).
+- 🧩 **`<fieldset>` Grouping**: Embed `Fieldset = true` inside `wtf.FormInfo` to wrap your fields in a `<fieldset>` container, keeping action controls (submit/reset) clean and outside.
+- 🗃️ **Label-First Checkbox Order**: Renders labels *before* the checkbox inputs, keeping markup ordering consistent with other field types.
+- 🏷️ **Native ARIA Roles**: Parse and render standard `role="..."` accessibility attributes on any form input.
+- 🦾 **HTML5 Autocomplete**: Support for native `autocomplete="..."` tags on form fields.
+- 🔄 **FormInfo Config & Runtime Overrides**: Configure actions, methods, custom button raw attributes, classes, and ARIA roles statically via tags or dynamically at runtime on `wtf.FormInfo`.
+
+---
 
 ## Installation
 
@@ -10,19 +25,26 @@
 go get github.com/malnossi/go-wtf
 ```
 
+---
+
 ## Quick Start
 
 ### 1. Define your form as a Go struct
 
+Embed `wtf.FormInfo` to configure form-level properties, submit buttons, reset buttons, and layouts:
+
 ```go
-type LoginForm struct {
-    Username string `form:"username,type=text,placeholder=Enter username,required"`
-    Password string `form:"password,type=password,placeholder=Enter password,required"`
-    Remember bool   `form:"remember,type=checkbox,label=Remember me"`
+type SubscriptionForm struct {
+    // 1. Static config: wrap fields in <fieldset>, set custom submit/reset labels and roles
+    Info      wtf.FormInfo `form:"_info,fieldset=true,submit_label=Subscribe,submit_role=button,reset_label=Clear,reset_role=button"`
+    
+    FirstName string       `form:"first_name,placeholder=First name,autocomplete=given-name,required"`
+    Email     string       `form:"email,type=email,placeholder=Email,autocomplete=email,required"`
+    Remember  bool         `form:"remember,label=Remember me,role=switch"`
 }
 ```
 
-### 2. Create a renderer and register it with your template
+### 2. Register with your template and execute
 
 ```go
 package main
@@ -34,11 +56,17 @@ import (
     wtf "github.com/malnossi/go-wtf"
 )
 
+var pageHTML = `
+<!DOCTYPE html>
+<html>
+<body>
+    <h2>Newsletter Subscription</h2>
+    {{render_form .Form}}
+</body>
+</html>`
+
 func main() {
-    renderer := wtf.New(
-        wtf.WithAction("/login"),
-        wtf.WithMethod("POST"),
-    )
+    renderer := wtf.New()
 
     tmpl := template.Must(
         template.New("page").Funcs(renderer.FuncMap()).Parse(pageHTML),
@@ -46,9 +74,9 @@ func main() {
 
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         data := struct {
-            Form LoginForm
+            Form SubscriptionForm
         }{
-            Form: LoginForm{Username: "defaultuser"},
+            Form: SubscriptionForm{},
         }
         tmpl.Execute(w, data)
     })
@@ -57,32 +85,37 @@ func main() {
 }
 ```
 
-### 3. Use `render_form` in your HTML template
+### Generated Plain HTML Output:
 
 ```html
-<!DOCTYPE html>
-<html>
-<body>
-    <h1>Login</h1>
-    {{render_form .Form}}
-</body>
-</html>
+<form method="POST">
+  <fieldset>
+  <label for="form-first_name">First name<span>*</span></label>
+  <input type="text" id="form-first_name" name="first_name" placeholder="First name" autocomplete="given-name" required />
+  <label for="form-email">Email<span>*</span></label>
+  <input type="email" id="form-email" name="email" placeholder="Email" autocomplete="email" required />
+  <label for="form-remember">Remember me</label>
+  <input type="checkbox" id="form-remember" name="remember" role="switch" value="true" />
+  </fieldset>
+  <input type="submit" value="Subscribe" role="button" />
+  <input type="reset" value="Clear" role="button" />
+</form>
 ```
 
-That's it! The form is rendered with labels, input fields, validation attributes, and built-in styling.
+---
 
 ## Struct Tag Syntax
 
-Tags follow the format:
+Struct tags follow this format:
 
 ```
 form:"name,key=value,key=value,flag"
 ```
 
-- **First value** is the field name (used as the HTML `name` attribute)
-- Subsequent values are key=value pairs or boolean flags
+- **First value**: The HTML field `name` attribute.
+- **Subsequent values**: Key-value options or standalone flags.
 
-### Supported Tag Options
+### Supported Field Options
 
 | Key | Description | Example |
 |-----|-------------|---------|
@@ -90,8 +123,9 @@ form:"name,key=value,key=value,flag"
 | `label` | Label text (auto-generated from name if omitted) | `label=Email Address` |
 | `placeholder` | Placeholder text | `placeholder=you@example.com` |
 | `id` | Custom HTML id (defaults to `form-{name}`) | `id=user-email` |
-| `class` | Additional CSS class for the input | `class=my-input` |
+| `class` | Custom CSS class for the input element | `class=my-input` |
 | `autocomplete` | HTML autocomplete attribute value | `autocomplete=email` |
+| `role` | ARIA accessibility role attribute | `role=switch` |
 | `required` | Mark field as required | `required` |
 | `disabled` | Mark field as disabled | `disabled` |
 | `readonly` | Mark field as read-only | `readonly` |
@@ -111,7 +145,7 @@ form:"name,key=value,key=value,flag"
 
 ### Automatic Type Inference
 
-If no `type` is specified, the type is inferred from the Go type:
+If no `type` is specified, the type is inferred from the Go struct field type:
 
 | Go Type | HTML Input Type |
 |---------|-----------------|
@@ -122,50 +156,35 @@ If no `type` is specified, the type is inferred from the Go type:
 | `bool` | `checkbox` |
 | `time.Time` | `datetime-local` |
 
-### Select/Radio Options Format
+---
 
-Options use pipe-separated values with an optional `value:label` format:
+## Form-Level Options & Runtime Overrides (`FormInfo`)
 
-```go
-// Simple options (value = label, auto-title-cased)
-Subject string `form:"subject,type=select,options=general|support|billing"`
-
-// Labeled options (value:label)
-Subject string `form:"subject,type=select,options=general:General Inquiry|support:Technical Support"`
-```
-
-## Declaring Form Options & Button Attributes (`FormInfo`)
-
-Instead of configuring options strictly on the `FormRenderer` instance, you can define form-level properties, custom button classes, a reset button, and raw HTML attributes (like HTMX `hx-post`, `hx-target`, or Unpoly `up-dismiss`) directly inside the form struct itself using the `wtf.FormInfo` struct field.
-
-### Usage
-
-Define a field of type `wtf.FormInfo` inside your form struct:
+Define form-level configurations directly inside the form struct using the `wtf.FormInfo` struct field:
 
 ```go
-type MyForm struct {
-    // 1. Configure statically via struct tags
-    Info wtf.FormInfo `form:"_info,action=/submit,submit_label=Register,submit_class=btn-primary,submit_attrs=up-dismiss hx-post='/register'"`
+type ContactForm struct {
+    // Declared statically via tag:
+    Info    wtf.FormInfo `form:"_info,action=/submit,submit_label=Send"`
     
-    Username string `form:"username,required"`
+    Name    string `form:"name"`
+    Message string `form:"message,type=textarea"`
 }
 ```
 
-Or configure it dynamically at runtime when instantiating the struct:
+Or configure it dynamically at runtime when instantiating the struct (takes priority over tags):
 
 ```go
-form := MyForm{
-    // 2. Configure dynamically at runtime (takes priority over tags)
+form := ContactForm{
     Info: wtf.FormInfo{
-        Action:      "/dynamic-submit",
+        Action:      "/dynamic-endpoint",
+        Fieldset:    true,
         SubmitLabel: "Send Message",
-        SubmitAttrs: `hx-post="/contact" up-dismiss hx-target="#result"`,
+        SubmitAttrs: `hx-post="/contact" up-dismiss`,
         ResetLabel:  "Clear Form",
-        ResetClass:  "btn-secondary",
-        ResetAttrs:  `hx-get="/clear"`,
-        FormAttrs:   `hx-target="#div"`,
+        ResetRole:   "button",
     },
-    Username: "bob",
+    Name: "Alice",
 }
 ```
 
@@ -190,24 +209,6 @@ form := MyForm{
 | `ResetRole` | `reset_role` | ARIA Accessibility role attribute for reset input | `reset_role=button` |
 
 ---
-
-## Renderer Options
-
-Configure the renderer with functional options:
-
-```go
-renderer := wtf.New(
-    wtf.WithAction("/submit"),          // Form action URL
-    wtf.WithMethod("POST"),             // HTTP method (default: POST)
-    wtf.WithCSRF("token123"),           // Add hidden CSRF field
-    wtf.WithClassPrefix("myapp"),       // CSS class prefix (default: wtf)
-    wtf.WithSubmitLabel("Sign In"),     // Submit button text (default: Submit)
-    wtf.WithFormID("login-form"),       // Form element ID
-    wtf.WithFormClass("custom-form"),   // Additional form CSS class
-    wtf.WithNoSubmit(true),             // Don't render submit button
-    wtf.WithEnctype("multipart/form-data"), // For file uploads
-)
-```
 
 ## API Reference
 
@@ -238,7 +239,7 @@ names := renderer.FieldNames(v interface{}) []string
 
 ### `FormFieldInfo`
 
-When using `renderer.Fields()`, you get access to field metadata:
+When using `renderer.Fields()`, you get access to parsed field metadata:
 
 ```go
 type FormFieldInfo struct {
@@ -251,77 +252,50 @@ type FormFieldInfo struct {
     Disabled    bool
     ReadOnly    bool
     Placeholder string
-    HTML        template.HTML  // Pre-rendered HTML
+    Role        string
+    HTML        template.HTML  // Pre-rendered HTML for this field
 }
 ```
 
-## Pre-populated Values
+---
 
-Struct fields are automatically pre-populated in the form:
+## Styling & Layout Control
+
+By default, `go-wtf` generates a flat, pure HTML output containing no styling or classes at all, returning standard elements (such as `  <label for="...">` and `  <input type="..." />`) under standard `2-space` prefixes.
+
+This allows you to style your forms entirely using modern utility-first CSS frameworks like **Tailwind CSS**, standard CSS, or layouts by targeting the raw tag names or by applying custom classes directly in struct tags:
 
 ```go
-form := LoginForm{
-    Username: "john@example.com",  // Input will have value="john@example.com"
-    Remember: true,                // Checkbox will be checked
+type TailwindForm struct {
+    Email string `form:"email,type=email,class=w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-300"`
 }
 ```
 
-## Custom Rendering with Fields
-
-For full control over layout, use `Fields()` to iterate over field info:
-
-```go
-renderer := wtf.New()
-
-funcMap := template.FuncMap{
-    "form_fields": renderer.Fields,
-}
-
-tmpl := template.Must(
-    template.New("page").Funcs(funcMap).Parse(`
-    <form method="post">
-        {{range form_fields .Form}}
-            <div class="my-field-wrapper">
-                {{.HTML}}
-            </div>
-        {{end}}
-        <button type="submit">Submit</button>
-    </form>
-    `),
-)
-```
+---
 
 ## Security
 
-- All output values are properly HTML-escaped using `html.EscapeString`
-- XSS attacks through struct values are prevented
-- CSRF tokens can be added via `WithCSRF()`
+- **Strict HTML Escaping**: All output values, labels, IDs, classes, and ARIA attributes are fully escaped using `html.EscapeString` to prevent XSS vulnerability.
+- **CSRF Token Injection**: Easily inject hidden CSRF inputs via renderer `WithCSRF(token)` option.
 
-## CSS Classes & Styling
+---
 
-`go-wtf` produces clean, semantic, styling-free HTML form elements. This allows you to style your forms entirely using your own custom CSS or frameworks (like Tailwind CSS or Bootstrap) using the generated CSS classes. The default class prefix is `wtf-` (customizable via `WithClassPrefix()`).
+## Verification & Testing
 
-CSS classes added to the HTML markup:
-- `wtf-form` — The form element
-- `wtf-form-group` — Field wrapper div
-- `wtf-form-label` — Label elements
-- `wtf-form-input` — Input elements
-- `wtf-form-select` — Select elements
-- `wtf-form-textarea` — Textarea elements
-- `wtf-form-checkbox` / `wtf-form-checkbox-group` — Checkbox elements
-- `wtf-form-radio` / `wtf-form-radio-group` / `wtf-form-radio-option` — Radio elements
-- `wtf-form-required` — Required field indicator (asterisk)
-- `wtf-form-submit` — Submit button
-- `wtf-form-reset` — Reset button
+Our codebase runs on **Go 1.26** with **100% test coverage** verified by a suite of **52 unit tests** ensuring correct ARIA role, fieldset wrapping, self-closing tag, and label-first checkbox layouts.
+
+---
 
 ## Example
 
-See the [example](./example/main.go) directory for a complete working demo with multiple form types.
+See the [example](./example/main.go) directory for a complete working demo server.
 
 ```bash
 go run ./example/
 # Visit http://localhost:8080
 ```
+
+---
 
 ## License
 
