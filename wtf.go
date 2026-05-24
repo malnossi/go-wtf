@@ -16,6 +16,7 @@ type FormInfo struct {
 	FormID      string
 	FormClass   string
 	FormAttrs   string // Custom raw attributes on <form> tag, e.g. "hx-target='#result'"
+	Fieldset    bool   // Wrap fields inside a <fieldset> tag
 	SubmitLabel string // Text for submit button
 	SubmitClass string // CSS class for submit button
 	SubmitAttrs string // Custom attributes for submit button, e.g. "up-dismiss hx-post='/login'"
@@ -41,6 +42,7 @@ type FormRenderer struct {
 	classPrefix   string
 	submitLabel   string
 	noSubmit      bool
+	fieldset      bool
 
 	// FormInfo options
 	formAttrs   string
@@ -133,6 +135,7 @@ func (r *FormRenderer) RenderFormWithAction(v interface{}, action, method string
 		classPrefix:   r.classPrefix,
 		submitLabel:   r.submitLabel,
 		noSubmit:      r.noSubmit,
+		fieldset:      r.fieldset,
 		formAttrs:     r.formAttrs,
 		submitClass:   r.submitClass,
 		submitAttrs:   r.submitAttrs,
@@ -168,6 +171,7 @@ func (r *FormRenderer) mergeFormInfo(info FormInfo) *FormRenderer {
 		classPrefix:   r.classPrefix,
 		submitLabel:   r.submitLabel,
 		noSubmit:      r.noSubmit,
+		fieldset:      r.fieldset,
 		formAttrs:     r.formAttrs,
 		submitClass:   r.submitClass,
 		submitAttrs:   r.submitAttrs,
@@ -195,6 +199,9 @@ func (r *FormRenderer) mergeFormInfo(info FormInfo) *FormRenderer {
 	}
 	if info.FormAttrs != "" {
 		merged.formAttrs = info.FormAttrs
+	}
+	if info.Fieldset {
+		merged.fieldset = true
 	}
 	if info.SubmitLabel != "" {
 		merged.submitLabel = info.SubmitLabel
@@ -289,26 +296,27 @@ func (r *FormRenderer) parseWithCache(v interface{}) ([]formField, *FormRenderer
 		}
 
 		fields[i] = formField{
-			Name:        m.Name,
-			Label:       m.Label,
-			Type:        m.Type,
-			ID:          m.ID,
-			Value:       valStr,
-			Required:    m.Required,
-			Disabled:    m.Disabled,
-			ReadOnly:    m.ReadOnly,
-			Pattern:     m.Pattern,
-			Min:         m.Min,
-			Max:         m.Max,
-			Step:        m.Step,
-			Placeholder: m.Placeholder,
-			Class:       m.Class,
-			Options:     opts,
-			Rows:        m.Rows,
-			Cols:        m.Cols,
-			Multiple:    m.Multiple,
-			Role:        m.Role,
-			FieldType:   m.FieldType,
+			Name:         m.Name,
+			Label:        m.Label,
+			Type:         m.Type,
+			ID:           m.ID,
+			Value:        valStr,
+			Required:     m.Required,
+			Disabled:     m.Disabled,
+			ReadOnly:     m.ReadOnly,
+			Pattern:      m.Pattern,
+			Min:          m.Min,
+			Max:          m.Max,
+			Step:         m.Step,
+			Placeholder:  m.Placeholder,
+			Class:        m.Class,
+			Autocomplete: m.Autocomplete,
+			Options:      opts,
+			Rows:         m.Rows,
+			Cols:         m.Cols,
+			Multiple:     m.Multiple,
+			Role:         m.Role,
+			FieldType:    m.FieldType,
 		}
 	}
 

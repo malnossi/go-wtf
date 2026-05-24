@@ -1077,10 +1077,10 @@ func TestInputRoleAttribute(t *testing.T) {
 	}
 
 	// Verify static FormInfo submit/reset roles
-	if !strings.Contains(result, `<input type="submit" value="Submit" role="button">`) {
+	if !strings.Contains(result, `<input type="submit" value="Submit" role="button" />`) {
 		t.Error("expected role='button' on static submit input")
 	}
-	if !strings.Contains(result, `<input type="reset" value="Clear" role="button">`) {
+	if !strings.Contains(result, `<input type="reset" value="Clear" role="button" />`) {
 		t.Error("expected role='button' on static reset input")
 	}
 }
@@ -1123,6 +1123,47 @@ func TestNoDivWrappers(t *testing.T) {
 
 	if strings.Contains(result, "<div") || strings.Contains(result, "</div>") {
 		t.Errorf("expected HTML output to contain no wrapper div elements, got: %s", result)
+	}
+}
+
+func TestFieldsetAndAutocomplete(t *testing.T) {
+	r := New()
+	type FieldsetForm struct {
+		Info      FormInfo `form:"_info,fieldset=true,submit_label=Subscribe"`
+		FirstName string   `form:"first_name,placeholder=First name,autocomplete=given-name"`
+		Email     string   `form:"email,type=email,placeholder=Email,autocomplete=email"`
+		Remember  bool     `form:"remember,role=switch"`
+	}
+
+	form := FieldsetForm{}
+	result := string(r.RenderForm(form))
+
+	// Verify fieldset wrapper is present and placed before fields but after form open
+	if !strings.Contains(result, "<form") || !strings.Contains(result, "<fieldset>") || !strings.Contains(result, "</fieldset>") {
+		t.Error("expected form and fieldset tags")
+	}
+
+	// Verify autocomplete attribute is correctly rendered on inputs
+	if !strings.Contains(result, `name="first_name" autocomplete="given-name"`) {
+		t.Error("expected autocomplete='given-name' attribute")
+	}
+	if !strings.Contains(result, `name="email" autocomplete="email"`) {
+		t.Error("expected autocomplete='email' attribute")
+	}
+
+	// Verify checkbox renders label first, then input with role="switch"
+	labelIdx := strings.Index(result, "Remember")
+	inputIdx := strings.Index(result, `type="checkbox"`)
+	if labelIdx == -1 || inputIdx == -1 || labelIdx > inputIdx {
+		t.Error("expected label to be rendered before checkbox input")
+	}
+
+	// Verify self-closing tags with " />"
+	if !strings.Contains(result, `type="checkbox"`) || !strings.Contains(result, `role="switch"`) || !strings.Contains(result, `value="true" />`) {
+		t.Error("expected checkbox to be self-closing with ' />'")
+	}
+	if !strings.Contains(result, `type="submit" value="Subscribe" />`) {
+		t.Error("expected submit input to be self-closing with ' />'")
 	}
 }
 

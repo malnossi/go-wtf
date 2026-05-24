@@ -27,8 +27,9 @@ type formField struct {
 	Step     string
 
 	// Appearance
-	Placeholder string
-	Class       string
+	Placeholder  string
+	Class        string
+	Autocomplete string
 
 	// Select/Radio options
 	Options []selectOption
@@ -57,26 +58,27 @@ type selectOption struct {
 // cachedField represents the static struct tag metadata of a field,
 // cached to avoid using reflection repeatedly.
 type cachedField struct {
-	Index       int
-	Name        string
-	Label       string
-	Type        string
-	ID          string
-	Required    bool
-	Disabled    bool
-	ReadOnly    bool
-	Pattern     string
-	Min         string
-	Max         string
-	Step        string
-	Placeholder string
-	Class       string
-	Options     []selectOption
-	Rows        string
-	Cols        string
-	Multiple    bool
-	Role        string
-	FieldType   reflect.Type
+	Index        int
+	Name         string
+	Label        string
+	Type         string
+	ID           string
+	Required     bool
+	Disabled     bool
+	ReadOnly     bool
+	Pattern      string
+	Min          string
+	Max          string
+	Step         string
+	Placeholder  string
+	Class        string
+	Autocomplete string
+	Options      []selectOption
+	Rows         string
+	Cols         string
+	Multiple     bool
+	Role         string
+	FieldType    reflect.Type
 }
 
 // structMetadata holds both the static FormInfo settings and the cached field metadatas for a struct type.
@@ -165,6 +167,8 @@ func parseFormInfoTag(tag string) FormInfo {
 			info.ResetAttrs = value
 		case "reset_role":
 			info.ResetRole = value
+		case "fieldset":
+			info.Fieldset = value == "true"
 		}
 	}
 	return info
@@ -190,6 +194,9 @@ func mergeFormInfoValues(static FormInfo, dynamic FormInfo) FormInfo {
 	}
 	if dynamic.FormAttrs != "" {
 		merged.FormAttrs = dynamic.FormAttrs
+	}
+	if dynamic.Fieldset {
+		merged.Fieldset = true
 	}
 	if dynamic.SubmitLabel != "" {
 		merged.SubmitLabel = dynamic.SubmitLabel
@@ -283,6 +290,8 @@ func parseTagMetadata(tag string, structField reflect.StructField, index int) ca
 			}
 		case "role":
 			field.Role = value
+		case "autocomplete":
+			field.Autocomplete = value
 		}
 	}
 

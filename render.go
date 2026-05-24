@@ -37,12 +37,21 @@ func renderForm(fields []formField, r *FormRenderer) string {
 
 	// CSRF token hidden field
 	if r.csrfToken != "" {
-		fmt.Fprintf(&b, `  <input type="hidden" name="_csrf" value="%s">`+"\n", html.EscapeString(r.csrfToken))
+		fmt.Fprintf(&b, `  <input type="hidden" name="_csrf" value="%s" />`+"\n", html.EscapeString(r.csrfToken))
+	}
+
+	// Fieldset tag
+	if r.fieldset {
+		b.WriteString("  <fieldset>\n")
 	}
 
 	// Render each field
 	for _, field := range fields {
 		b.WriteString(renderField(field, r))
+	}
+
+	if r.fieldset {
+		b.WriteString("  </fieldset>\n")
 	}
 
 	// Submit button
@@ -57,7 +66,7 @@ func renderForm(fields []formField, r *FormRenderer) string {
 		if r.submitAttrs != "" {
 			fmt.Fprintf(&b, " %s", r.submitAttrs)
 		}
-		b.WriteString(">\n")
+		b.WriteString(" />\n")
 	}
 
 	// Reset button
@@ -72,7 +81,7 @@ func renderForm(fields []formField, r *FormRenderer) string {
 		if r.resetAttrs != "" {
 			fmt.Fprintf(&b, " %s", r.resetAttrs)
 		}
-		b.WriteString(">\n")
+		b.WriteString(" />\n")
 	}
 
 	b.WriteString("</form>")
@@ -140,6 +149,10 @@ func renderInput(f formField, r *FormRenderer) string {
 		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
 	}
 
+	if f.Autocomplete != "" {
+		fmt.Fprintf(&b, ` autocomplete="%s"`, html.EscapeString(f.Autocomplete))
+	}
+
 	if f.Value != "" {
 		fmt.Fprintf(&b, ` value="%s"`, html.EscapeString(f.Value))
 	}
@@ -168,7 +181,7 @@ func renderInput(f formField, r *FormRenderer) string {
 		fmt.Fprintf(&b, ` step="%s"`, html.EscapeString(f.Step))
 	}
 
-	b.WriteString(">\n")
+	b.WriteString(" />\n")
 	return b.String()
 }
 
@@ -186,6 +199,10 @@ func renderTextarea(f formField, r *FormRenderer) string {
 
 	if f.Role != "" {
 		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
+	}
+
+	if f.Autocomplete != "" {
+		fmt.Fprintf(&b, ` autocomplete="%s"`, html.EscapeString(f.Autocomplete))
 	}
 
 	if f.Rows != "" {
@@ -264,6 +281,10 @@ func renderSelect(f formField, r *FormRenderer) string {
 func renderCheckbox(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
+	// Label first
+	b.WriteString(renderLabel(f, r))
+
+	// Input second
 	fmt.Fprintf(&b, `  <input type="checkbox" id="%s" name="%s"`,
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Name))
@@ -286,11 +307,7 @@ func renderCheckbox(f formField, r *FormRenderer) string {
 		b.WriteString(` disabled`)
 	}
 
-	b.WriteString(" value=\"true\">\n")
-
-	fmt.Fprintf(&b, `  <label for="%s">%s</label>`+"\n",
-		html.EscapeString(f.ID),
-		html.EscapeString(f.Label))
+	b.WriteString(" value=\"true\" />\n")
 
 	return b.String()
 }
@@ -327,7 +344,7 @@ func renderRadio(f formField, r *FormRenderer) string {
 		if f.Disabled {
 			b.WriteString(` disabled`)
 		}
-		b.WriteString(">\n")
+		b.WriteString(" />\n")
 
 		fmt.Fprintf(&b, `  <label for="%s">%s</label>`+"\n",
 			html.EscapeString(optID),
@@ -339,7 +356,7 @@ func renderRadio(f formField, r *FormRenderer) string {
 
 // renderHidden renders a hidden input field (no label, no wrapper).
 func renderHidden(f formField, r *FormRenderer) string {
-	return fmt.Sprintf(`  <input type="hidden" id="%s" name="%s" value="%s">`+"\n",
+	return fmt.Sprintf(`  <input type="hidden" id="%s" name="%s" value="%s" />`+"\n",
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Name),
 		html.EscapeString(f.Value))
