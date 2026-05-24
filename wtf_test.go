@@ -1110,3 +1110,19 @@ func TestDynamicFormInfoRoles(t *testing.T) {
 	}
 }
 
+func TestNoDivWrappers(t *testing.T) {
+	r := New()
+	type WrapperTestForm struct {
+		Username string `form:"username"`
+		Agree    bool   `form:"agree"`
+		Theme    string `form:"theme,type=radio,options=light|dark"`
+	}
+
+	form := WrapperTestForm{}
+	result := string(r.RenderForm(form))
+
+	if strings.Contains(result, "<div") || strings.Contains(result, "</div>") {
+		t.Errorf("expected HTML output to contain no wrapper div elements, got: %s", result)
+	}
+}
+
