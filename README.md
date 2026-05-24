@@ -91,6 +91,7 @@ form:"name,key=value,key=value,flag"
 | `placeholder` | Placeholder text | `placeholder=you@example.com` |
 | `id` | Custom HTML id (defaults to `form-{name}`) | `id=user-email` |
 | `class` | Additional CSS class for the input | `class=my-input` |
+| `autocomplete` | HTML autocomplete attribute value | `autocomplete=email` |
 | `required` | Mark field as required | `required` |
 | `disabled` | Mark field as disabled | `disabled` |
 | `readonly` | Mark field as read-only | `readonly` |
@@ -178,6 +179,7 @@ form := MyForm{
 | `FormID` | `id` | Form element ID | `id=my-form` |
 | `FormClass` | `class` | Custom CSS class for `<form>` | `class=form-dark` |
 | `FormAttrs` | `attrs` | Raw HTML attributes on `<form>` | `attrs=hx-target="#div"` |
+| `Fieldset`  | `fieldset` | Wrap form fields in a `<fieldset>` element | `fieldset=true` |
 | `SubmitLabel` | `submit_label` | Text for submit button | `submit_label=Save` |
 | `SubmitClass` | `submit_class` | Additional CSS class for submit | `submit_class=btn-success` |
 | `SubmitAttrs` | `submit_attrs` | Raw HTML attributes on submit button | `submit_attrs=up-dismiss hx-post="/save"` |
