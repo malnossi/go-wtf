@@ -40,6 +40,9 @@ type formField struct {
 	// Multi-value (for slices)
 	Multiple bool
 
+	// Accessibility
+	Role string
+
 	// Field metadata
 	FieldType reflect.Type
 }
@@ -72,6 +75,7 @@ type cachedField struct {
 	Rows        string
 	Cols        string
 	Multiple    bool
+	Role        string
 	FieldType   reflect.Type
 }
 
@@ -267,6 +271,8 @@ func parseTagMetadata(tag string, structField reflect.StructField, index int) ca
 			} else {
 				field.Multiple = true
 			}
+		case "role":
+			field.Role = value
 		}
 	}
 

@@ -226,9 +226,9 @@ func TestRenderLoginForm(t *testing.T) {
 		t.Error("expected remember name")
 	}
 
-	// Check submit button
-	if !strings.Contains(result, `<button type="submit"`) {
-		t.Error("expected submit button")
+	// Check submit input
+	if !strings.Contains(result, `type="submit"`) {
+		t.Error("expected submit input")
 	}
 }
 
@@ -515,7 +515,7 @@ func TestNoSubmitButton(t *testing.T) {
 	result := string(r.RenderForm(form))
 
 	if strings.Contains(result, `type="submit"`) {
-		t.Error("should not contain submit button when WithNoSubmit is true")
+		t.Error("should not contain submit input when WithNoSubmit is true")
 	}
 }
 
@@ -1011,8 +1011,8 @@ func TestStaticFormInfo(t *testing.T) {
 	if !strings.Contains(result, `hx-post='/static' up-dismiss`) {
 		t.Error("expected custom submit attributes")
 	}
-	if !strings.Contains(result, `Cancel</button>`) {
-		t.Error("expected reset button with label")
+	if !strings.Contains(result, `value="Cancel"`) {
+		t.Error("expected reset input with label Cancel")
 	}
 	if !strings.Contains(result, `class="wtf-form-reset btn-c"`) {
 		t.Error("expected custom reset class")
@@ -1044,17 +1044,36 @@ func TestDynamicFormInfo(t *testing.T) {
 	if !strings.Contains(result, `hx-target="#div"`) {
 		t.Error("expected dynamic raw form attributes")
 	}
-	if !strings.Contains(result, `Register Now</button>`) {
-		t.Error("expected dynamic submit label")
+	if !strings.Contains(result, `value="Register Now"`) {
+		t.Error("expected dynamic submit value Register Now")
 	}
 	if !strings.Contains(result, `up-dismiss hx-post="/dynamic"`) {
 		t.Error("expected dynamic submit attributes")
 	}
-	if !strings.Contains(result, `Clear</button>`) {
-		t.Error("expected dynamic reset button")
+	if !strings.Contains(result, `value="Clear"`) {
+		t.Error("expected dynamic reset value Clear")
 	}
 	if !strings.Contains(result, `hx-get="/clear"`) {
 		t.Error("expected dynamic reset attributes")
+	}
+}
+
+type RoleForm struct {
+	Username string `form:"username,role=textbox"`
+	Age      int    `form:"age,role=spinbutton"`
+}
+
+func TestInputRoleAttribute(t *testing.T) {
+	r := New()
+	form := RoleForm{}
+
+	result := string(r.RenderForm(form))
+
+	if !strings.Contains(result, `role="textbox"`) {
+		t.Error("expected role='textbox' on username input")
+	}
+	if !strings.Contains(result, `role="spinbutton"`) {
+		t.Error("expected role='spinbutton' on age input")
 	}
 }
 

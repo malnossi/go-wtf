@@ -54,11 +54,13 @@ func renderForm(fields []formField, r *FormRenderer) string {
 		if r.submitClass != "" {
 			submitClass += " " + r.submitClass
 		}
-		fmt.Fprintf(&b, `  <button type="submit" class="%s"`, html.EscapeString(submitClass))
+		fmt.Fprintf(&b, `  <input type="submit" class="%s" value="%s"`, 
+			html.EscapeString(submitClass), 
+			html.EscapeString(r.submitLabel))
 		if r.submitAttrs != "" {
 			fmt.Fprintf(&b, " %s", r.submitAttrs)
 		}
-		fmt.Fprintf(&b, ">%s</button>\n", html.EscapeString(r.submitLabel))
+		b.WriteString(">\n")
 	}
 
 	// Reset button
@@ -67,11 +69,13 @@ func renderForm(fields []formField, r *FormRenderer) string {
 		if r.resetClass != "" {
 			resetClass += " " + r.resetClass
 		}
-		fmt.Fprintf(&b, `  <button type="reset" class="%s"`, html.EscapeString(resetClass))
+		fmt.Fprintf(&b, `  <input type="reset" class="%s" value="%s"`, 
+			html.EscapeString(resetClass), 
+			html.EscapeString(r.resetLabel))
 		if r.resetAttrs != "" {
 			fmt.Fprintf(&b, " %s", r.resetAttrs)
 		}
-		fmt.Fprintf(&b, ">%s</button>\n", html.EscapeString(r.resetLabel))
+		b.WriteString(">\n")
 	}
 
 	b.WriteString("</form>")
@@ -142,6 +146,10 @@ func renderInput(f formField, r *FormRenderer) string {
 		html.EscapeString(f.Name),
 		html.EscapeString(inputClass))
 
+	if f.Role != "" {
+		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
+	}
+
 	if f.Value != "" {
 		fmt.Fprintf(&b, ` value="%s"`, html.EscapeString(f.Value))
 	}
@@ -187,6 +195,10 @@ func renderTextarea(f formField, r *FormRenderer) string {
 		html.EscapeString(f.Name),
 		html.EscapeString(textareaClass))
 
+	if f.Role != "" {
+		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
+	}
+
 	if f.Rows != "" {
 		fmt.Fprintf(&b, ` rows="%s"`, html.EscapeString(f.Rows))
 	}
@@ -222,6 +234,10 @@ func renderSelect(f formField, r *FormRenderer) string {
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Name),
 		html.EscapeString(selectClass))
+
+	if f.Role != "" {
+		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
+	}
 
 	if f.Required {
 		b.WriteString(` required`)

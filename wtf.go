@@ -293,6 +293,7 @@ func (r *FormRenderer) parseWithCache(v interface{}) ([]formField, *FormRenderer
 			Rows:        m.Rows,
 			Cols:        m.Cols,
 			Multiple:    m.Multiple,
+			Role:        m.Role,
 			FieldType:   m.FieldType,
 		}
 	}
@@ -359,6 +360,7 @@ func (r *FormRenderer) Fields(v interface{}) []FormFieldInfo {
 			Disabled:    f.Disabled,
 			ReadOnly:    f.ReadOnly,
 			Placeholder: f.Placeholder,
+			Role:        f.Role,
 			HTML:        template.HTML(renderField(f, renderer)),
 		}
 	}
@@ -378,6 +380,7 @@ type FormFieldInfo struct {
 	Disabled    bool
 	ReadOnly    bool
 	Placeholder string
+	Role        string
 	HTML        template.HTML // Pre-rendered HTML for this field
 }
 
