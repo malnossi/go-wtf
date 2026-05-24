@@ -1,5 +1,9 @@
 # go-wtf
 
+<p align="center">
+  <img src="logo.png" alt="go-wtf Logo" width="260px">
+</p>
+
 **Web Template Forms** — Pure semantic, styling-free, class-free, and wrapper-free HTML form generation from Go structs.
 
 `go-wtf` reads struct tags on your Go structs and generates clean, accessible HTML5 forms. It integrates seamlessly with Go's `html/template` engine via a custom `FuncMap`, rendering standard inputs, textareas, selects, radios, and checkboxes with a simple `{{render_form .Form}}` template call.
