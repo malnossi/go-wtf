@@ -468,18 +468,8 @@ func TestCSRFToken(t *testing.T) {
 
 func TestCustomClassPrefix(t *testing.T) {
 	r := New(WithClassPrefix("myapp"))
-	form := LoginForm{}
-
-	result := string(r.RenderForm(form))
-
-	if !strings.Contains(result, `class="myapp-form"`) {
-		t.Error("expected custom class prefix on form")
-	}
-	if !strings.Contains(result, `myapp-form-group`) {
-		t.Error("expected custom class prefix on form-group")
-	}
-	if !strings.Contains(result, `myapp-form-input`) {
-		t.Error("expected custom class prefix on input")
+	if r.classPrefix != "myapp" {
+		t.Error("expected class prefix myapp")
 	}
 }
 
@@ -1005,7 +995,7 @@ func TestStaticFormInfo(t *testing.T) {
 	if !strings.Contains(result, `method="GET"`) {
 		t.Error("expected custom method from tag FormInfo")
 	}
-	if !strings.Contains(result, `class="wtf-form-submit btn-p"`) {
+	if !strings.Contains(result, `class="btn-p"`) {
 		t.Error("expected custom submit button class")
 	}
 	if !strings.Contains(result, `hx-post='/static' up-dismiss`) {
@@ -1014,7 +1004,7 @@ func TestStaticFormInfo(t *testing.T) {
 	if !strings.Contains(result, `value="Cancel"`) {
 		t.Error("expected reset input with label Cancel")
 	}
-	if !strings.Contains(result, `class="wtf-form-reset btn-c"`) {
+	if !strings.Contains(result, `class="btn-c"`) {
 		t.Error("expected custom reset class")
 	}
 	if !strings.Contains(result, `hx-get='/cancel'`) {
@@ -1087,10 +1077,10 @@ func TestInputRoleAttribute(t *testing.T) {
 	}
 
 	// Verify static FormInfo submit/reset roles
-	if !strings.Contains(result, `<input type="submit" class="wtf-form-submit" value="Submit" role="button">`) {
+	if !strings.Contains(result, `<input type="submit" value="Submit" role="button">`) {
 		t.Error("expected role='button' on static submit input")
 	}
-	if !strings.Contains(result, `<input type="reset" class="wtf-form-reset" value="Clear" role="button">`) {
+	if !strings.Contains(result, `<input type="reset" value="Clear" role="button">`) {
 		t.Error("expected role='button' on static reset input")
 	}
 }

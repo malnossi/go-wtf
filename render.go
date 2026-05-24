@@ -15,12 +15,9 @@ func renderForm(fields []formField, r *FormRenderer) string {
 		fmt.Fprintf(&b, ` id="%s"`, html.EscapeString(r.formID))
 	}
 
-	// Build class list
-	formClass := r.prefix("form")
 	if r.formClass != "" {
-		formClass += " " + r.formClass
+		fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(r.formClass))
 	}
-	fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(formClass))
 
 	if r.action != "" {
 		fmt.Fprintf(&b, ` action="%s"`, html.EscapeString(r.action))
@@ -50,13 +47,10 @@ func renderForm(fields []formField, r *FormRenderer) string {
 
 	// Submit button
 	if !r.noSubmit {
-		submitClass := r.prefix("form-submit")
+		fmt.Fprintf(&b, `  <input type="submit" value="%s"`, html.EscapeString(r.submitLabel))
 		if r.submitClass != "" {
-			submitClass += " " + r.submitClass
+			fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(r.submitClass))
 		}
-		fmt.Fprintf(&b, `  <input type="submit" class="%s" value="%s"`, 
-			html.EscapeString(submitClass), 
-			html.EscapeString(r.submitLabel))
 		if r.submitRole != "" {
 			fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(r.submitRole))
 		}
@@ -68,13 +62,10 @@ func renderForm(fields []formField, r *FormRenderer) string {
 
 	// Reset button
 	if r.resetLabel != "" {
-		resetClass := r.prefix("form-reset")
+		fmt.Fprintf(&b, `  <input type="reset" value="%s"`, html.EscapeString(r.resetLabel))
 		if r.resetClass != "" {
-			resetClass += " " + r.resetClass
+			fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(r.resetClass))
 		}
-		fmt.Fprintf(&b, `  <input type="reset" class="%s" value="%s"`, 
-			html.EscapeString(resetClass), 
-			html.EscapeString(r.resetLabel))
 		if r.resetRole != "" {
 			fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(r.resetRole))
 		}
@@ -103,7 +94,7 @@ func renderField(f formField, r *FormRenderer) string {
 	}
 
 	// Wrap in form group
-	fmt.Fprintf(&b, `  <div class="%s">`+"\n", html.EscapeString(r.prefix("form-group")))
+	fmt.Fprintf(&b, "  <div>\n")
 
 	// Label
 	b.WriteString(renderLabel(f, r))
@@ -127,12 +118,11 @@ func renderField(f formField, r *FormRenderer) string {
 // renderLabel renders a <label> element for a field.
 func renderLabel(f formField, r *FormRenderer) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, `    <label for="%s" class="%s">%s`,
+	fmt.Fprintf(&b, `    <label for="%s">%s`,
 		html.EscapeString(f.ID),
-		html.EscapeString(r.prefix("form-label")),
 		html.EscapeString(f.Label))
 	if f.Required {
-		fmt.Fprintf(&b, `<span class="%s">*</span>`, html.EscapeString(r.prefix("form-required")))
+		b.WriteString("<span>*</span>")
 	}
 	b.WriteString("</label>\n")
 	return b.String()
@@ -141,16 +131,15 @@ func renderLabel(f formField, r *FormRenderer) string {
 // renderInput renders a standard <input> element.
 func renderInput(f formField, r *FormRenderer) string {
 	var b strings.Builder
-	inputClass := r.prefix("form-input")
-	if f.Class != "" {
-		inputClass += " " + f.Class
-	}
 
-	fmt.Fprintf(&b, `    <input type="%s" id="%s" name="%s" class="%s"`,
+	fmt.Fprintf(&b, `    <input type="%s" id="%s" name="%s"`,
 		html.EscapeString(f.Type),
 		html.EscapeString(f.ID),
-		html.EscapeString(f.Name),
-		html.EscapeString(inputClass))
+		html.EscapeString(f.Name))
+
+	if f.Class != "" {
+		fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(f.Class))
+	}
 
 	if f.Role != "" {
 		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
@@ -191,15 +180,14 @@ func renderInput(f formField, r *FormRenderer) string {
 // renderTextarea renders a <textarea> element.
 func renderTextarea(f formField, r *FormRenderer) string {
 	var b strings.Builder
-	textareaClass := r.prefix("form-textarea")
-	if f.Class != "" {
-		textareaClass += " " + f.Class
-	}
 
-	fmt.Fprintf(&b, `    <textarea id="%s" name="%s" class="%s"`,
+	fmt.Fprintf(&b, `    <textarea id="%s" name="%s"`,
 		html.EscapeString(f.ID),
-		html.EscapeString(f.Name),
-		html.EscapeString(textareaClass))
+		html.EscapeString(f.Name))
+
+	if f.Class != "" {
+		fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(f.Class))
+	}
 
 	if f.Role != "" {
 		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
@@ -231,15 +219,14 @@ func renderTextarea(f formField, r *FormRenderer) string {
 // renderSelect renders a <select> element with <option> children.
 func renderSelect(f formField, r *FormRenderer) string {
 	var b strings.Builder
-	selectClass := r.prefix("form-select")
-	if f.Class != "" {
-		selectClass += " " + f.Class
-	}
 
-	fmt.Fprintf(&b, `    <select id="%s" name="%s" class="%s"`,
+	fmt.Fprintf(&b, `    <select id="%s" name="%s"`,
 		html.EscapeString(f.ID),
-		html.EscapeString(f.Name),
-		html.EscapeString(selectClass))
+		html.EscapeString(f.Name))
+
+	if f.Class != "" {
+		fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(f.Class))
+	}
 
 	if f.Role != "" {
 		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
@@ -282,18 +269,16 @@ func renderSelect(f formField, r *FormRenderer) string {
 func renderCheckbox(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, `  <div class="%s">`+"\n", html.EscapeString(r.prefix("form-group")))
-	fmt.Fprintf(&b, `    <div class="%s">`+"\n", html.EscapeString(r.prefix("form-checkbox-group")))
+	fmt.Fprintf(&b, "  <div>\n")
+	fmt.Fprintf(&b, "    <div>\n")
 
-	inputClass := r.prefix("form-checkbox")
-	if f.Class != "" {
-		inputClass += " " + f.Class
-	}
-
-	fmt.Fprintf(&b, `      <input type="checkbox" id="%s" name="%s" class="%s"`,
+	fmt.Fprintf(&b, `      <input type="checkbox" id="%s" name="%s"`,
 		html.EscapeString(f.ID),
-		html.EscapeString(f.Name),
-		html.EscapeString(inputClass))
+		html.EscapeString(f.Name))
+
+	if f.Class != "" {
+		fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(f.Class))
+	}
 
 	if f.Role != "" {
 		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
@@ -311,9 +296,8 @@ func renderCheckbox(f formField, r *FormRenderer) string {
 
 	b.WriteString(" value=\"true\">\n")
 
-	fmt.Fprintf(&b, `      <label for="%s" class="%s">%s</label>`+"\n",
+	fmt.Fprintf(&b, `      <label for="%s">%s</label>`+"\n",
 		html.EscapeString(f.ID),
-		html.EscapeString(r.prefix("form-checkbox-label")),
 		html.EscapeString(f.Label))
 
 	b.WriteString("    </div>\n")
@@ -325,24 +309,26 @@ func renderCheckbox(f formField, r *FormRenderer) string {
 func renderRadio(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, `  <div class="%s">`+"\n", html.EscapeString(r.prefix("form-group")))
+	fmt.Fprintf(&b, "  <div>\n")
 
 	// Label for the group
 	b.WriteString(renderLabel(f, r))
 
-	fmt.Fprintf(&b, `    <div class="%s">`+"\n", html.EscapeString(r.prefix("form-radio-group")))
+	fmt.Fprintf(&b, "    <div>\n")
 
 	for i, opt := range f.Options {
 		optID := fmt.Sprintf("%s-%d", f.ID, i)
 
-		fmt.Fprintf(&b, `      <div class="%s">`+"\n", html.EscapeString(r.prefix("form-radio-option")))
+		fmt.Fprintf(&b, "      <div>\n")
 
-		radioClass := r.prefix("form-radio")
-		fmt.Fprintf(&b, `        <input type="radio" id="%s" name="%s" value="%s" class="%s"`,
+		fmt.Fprintf(&b, `        <input type="radio" id="%s" name="%s" value="%s"`,
 			html.EscapeString(optID),
 			html.EscapeString(f.Name),
-			html.EscapeString(opt.Value),
-			html.EscapeString(radioClass))
+			html.EscapeString(opt.Value))
+
+		if f.Class != "" {
+			fmt.Fprintf(&b, ` class="%s"`, html.EscapeString(f.Class))
+		}
 
 		if f.Role != "" {
 			fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
@@ -359,9 +345,8 @@ func renderRadio(f formField, r *FormRenderer) string {
 		}
 		b.WriteString(">\n")
 
-		fmt.Fprintf(&b, `        <label for="%s" class="%s">%s</label>`+"\n",
+		fmt.Fprintf(&b, `        <label for="%s">%s</label>`+"\n",
 			html.EscapeString(optID),
-			html.EscapeString(r.prefix("form-radio-label")),
 			html.EscapeString(opt.Label))
 
 		b.WriteString("      </div>\n")
