@@ -181,9 +181,11 @@ form := MyForm{
 | `SubmitLabel` | `submit_label` | Text for submit button | `submit_label=Save` |
 | `SubmitClass` | `submit_class` | Additional CSS class for submit | `submit_class=btn-success` |
 | `SubmitAttrs` | `submit_attrs` | Raw HTML attributes on submit button | `submit_attrs=up-dismiss hx-post="/save"` |
+| `SubmitRole` | `submit_role` | ARIA Accessibility role attribute for submit input | `submit_role=button` |
 | `ResetLabel` | `reset_label` | Text for reset button (rendered if set) | `reset_label=Cancel` |
 | `ResetClass` | `reset_class` | Additional CSS class for reset | `reset_class=btn-outline` |
 | `ResetAttrs` | `reset_attrs` | Raw HTML attributes on reset button | `reset_attrs=hx-get="/cancel"` |
+| `ResetRole` | `reset_role` | ARIA Accessibility role attribute for reset input | `reset_role=button` |
 
 ---
 

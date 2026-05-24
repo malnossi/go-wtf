@@ -57,6 +57,9 @@ func renderForm(fields []formField, r *FormRenderer) string {
 		fmt.Fprintf(&b, `  <input type="submit" class="%s" value="%s"`, 
 			html.EscapeString(submitClass), 
 			html.EscapeString(r.submitLabel))
+		if r.submitRole != "" {
+			fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(r.submitRole))
+		}
 		if r.submitAttrs != "" {
 			fmt.Fprintf(&b, " %s", r.submitAttrs)
 		}
@@ -72,6 +75,9 @@ func renderForm(fields []formField, r *FormRenderer) string {
 		fmt.Fprintf(&b, `  <input type="reset" class="%s" value="%s"`, 
 			html.EscapeString(resetClass), 
 			html.EscapeString(r.resetLabel))
+		if r.resetRole != "" {
+			fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(r.resetRole))
+		}
 		if r.resetAttrs != "" {
 			fmt.Fprintf(&b, " %s", r.resetAttrs)
 		}
@@ -289,6 +295,10 @@ func renderCheckbox(f formField, r *FormRenderer) string {
 		html.EscapeString(f.Name),
 		html.EscapeString(inputClass))
 
+	if f.Role != "" {
+		fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
+	}
+
 	if f.Value == "true" {
 		b.WriteString(` checked`)
 	}
@@ -333,6 +343,10 @@ func renderRadio(f formField, r *FormRenderer) string {
 			html.EscapeString(f.Name),
 			html.EscapeString(opt.Value),
 			html.EscapeString(radioClass))
+
+		if f.Role != "" {
+			fmt.Fprintf(&b, ` role="%s"`, html.EscapeString(f.Role))
+		}
 
 		if opt.Selected {
 			b.WriteString(` checked`)

@@ -19,9 +19,11 @@ type FormInfo struct {
 	SubmitLabel string // Text for submit button
 	SubmitClass string // CSS class for submit button
 	SubmitAttrs string // Custom attributes for submit button, e.g. "up-dismiss hx-post='/login'"
+	SubmitRole  string // Role attribute for submit button, e.g. "button"
 	ResetLabel  string // Text for reset button (only rendered if non-empty)
 	ResetClass  string // CSS class for reset button
 	ResetAttrs  string // Custom attributes for reset button, e.g. "up-dismiss hx-get='/reset'"
+	ResetRole   string // Role attribute for reset button, e.g. "button"
 }
 
 // FormRenderer is the main entry point for rendering HTML forms from Go structs.
@@ -44,9 +46,11 @@ type FormRenderer struct {
 	formAttrs   string
 	submitClass string
 	submitAttrs string
+	submitRole  string
 	resetLabel  string
 	resetClass  string
 	resetAttrs  string
+	resetRole   string
 
 	// Cache for parsed struct tags (struct type -> parsed fields)
 	cache sync.Map
@@ -132,9 +136,11 @@ func (r *FormRenderer) RenderFormWithAction(v interface{}, action, method string
 		formAttrs:     r.formAttrs,
 		submitClass:   r.submitClass,
 		submitAttrs:   r.submitAttrs,
+		submitRole:    r.submitRole,
 		resetLabel:    r.resetLabel,
 		resetClass:    r.resetClass,
 		resetAttrs:    r.resetAttrs,
+		resetRole:     r.resetRole,
 	}
 
 	if v == nil {
@@ -165,9 +171,11 @@ func (r *FormRenderer) mergeFormInfo(info FormInfo) *FormRenderer {
 		formAttrs:     r.formAttrs,
 		submitClass:   r.submitClass,
 		submitAttrs:   r.submitAttrs,
+		submitRole:    r.submitRole,
 		resetLabel:    r.resetLabel,
 		resetClass:    r.resetClass,
 		resetAttrs:    r.resetAttrs,
+		resetRole:     r.resetRole,
 	}
 
 	if info.Action != "" {
@@ -197,6 +205,9 @@ func (r *FormRenderer) mergeFormInfo(info FormInfo) *FormRenderer {
 	if info.SubmitAttrs != "" {
 		merged.submitAttrs = info.SubmitAttrs
 	}
+	if info.SubmitRole != "" {
+		merged.submitRole = info.SubmitRole
+	}
 	if info.ResetLabel != "" {
 		merged.resetLabel = info.ResetLabel
 	}
@@ -205,6 +216,9 @@ func (r *FormRenderer) mergeFormInfo(info FormInfo) *FormRenderer {
 	}
 	if info.ResetAttrs != "" {
 		merged.resetAttrs = info.ResetAttrs
+	}
+	if info.ResetRole != "" {
+		merged.resetRole = info.ResetRole
 	}
 
 	return merged

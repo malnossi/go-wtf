@@ -155,12 +155,16 @@ func parseFormInfoTag(tag string) FormInfo {
 			info.SubmitClass = value
 		case "submit_attrs":
 			info.SubmitAttrs = value
+		case "submit_role":
+			info.SubmitRole = value
 		case "reset_label":
 			info.ResetLabel = value
 		case "reset_class":
 			info.ResetClass = value
 		case "reset_attrs":
 			info.ResetAttrs = value
+		case "reset_role":
+			info.ResetRole = value
 		}
 	}
 	return info
@@ -196,6 +200,9 @@ func mergeFormInfoValues(static FormInfo, dynamic FormInfo) FormInfo {
 	if dynamic.SubmitAttrs != "" {
 		merged.SubmitAttrs = dynamic.SubmitAttrs
 	}
+	if dynamic.SubmitRole != "" {
+		merged.SubmitRole = dynamic.SubmitRole
+	}
 	if dynamic.ResetLabel != "" {
 		merged.ResetLabel = dynamic.ResetLabel
 	}
@@ -204,6 +211,9 @@ func mergeFormInfoValues(static FormInfo, dynamic FormInfo) FormInfo {
 	}
 	if dynamic.ResetAttrs != "" {
 		merged.ResetAttrs = dynamic.ResetAttrs
+	}
+	if dynamic.ResetRole != "" {
+		merged.ResetRole = dynamic.ResetRole
 	}
 	return merged
 }

@@ -1059,8 +1059,11 @@ func TestDynamicFormInfo(t *testing.T) {
 }
 
 type RoleForm struct {
-	Username string `form:"username,role=textbox"`
-	Age      int    `form:"age,role=spinbutton"`
+	Info     FormInfo `form:"_info,submit_role=button,reset_role=button,reset_label=Clear"`
+	Username string   `form:"username,role=textbox"`
+	Age      int      `form:"age,role=spinbutton"`
+	Agree    bool     `form:"agree,role=checkbox"`
+	Theme    string   `form:"theme,type=radio,options=light|dark,role=radiogroup"`
 }
 
 func TestInputRoleAttribute(t *testing.T) {
@@ -1069,11 +1072,51 @@ func TestInputRoleAttribute(t *testing.T) {
 
 	result := string(r.RenderForm(form))
 
+	// Verify field-level roles
 	if !strings.Contains(result, `role="textbox"`) {
 		t.Error("expected role='textbox' on username input")
 	}
 	if !strings.Contains(result, `role="spinbutton"`) {
 		t.Error("expected role='spinbutton' on age input")
+	}
+	if !strings.Contains(result, `role="checkbox"`) {
+		t.Error("expected role='checkbox' on agree input")
+	}
+	if !strings.Contains(result, `role="radiogroup"`) {
+		t.Error("expected role='radiogroup' on theme radio inputs")
+	}
+
+	// Verify static FormInfo submit/reset roles
+	if !strings.Contains(result, `<input type="submit" class="wtf-form-submit" value="Submit" role="button">`) {
+		t.Error("expected role='button' on static submit input")
+	}
+	if !strings.Contains(result, `<input type="reset" class="wtf-form-reset" value="Clear" role="button">`) {
+		t.Error("expected role='button' on static reset input")
+	}
+}
+
+func TestDynamicFormInfoRoles(t *testing.T) {
+	r := New()
+	type DynamicRoleForm struct {
+		Info     FormInfo
+		Username string `form:"username"`
+	}
+
+	form := DynamicRoleForm{
+		Info: FormInfo{
+			SubmitRole: "submit-btn",
+			ResetLabel: "Clear",
+			ResetRole:  "reset-btn",
+		},
+	}
+
+	result := string(r.RenderForm(form))
+
+	if !strings.Contains(result, `role="submit-btn"`) {
+		t.Error("expected dynamic submit role")
+	}
+	if !strings.Contains(result, `role="reset-btn"`) {
+		t.Error("expected dynamic reset role")
 	}
 }
 
