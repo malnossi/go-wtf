@@ -12,7 +12,7 @@
 
 ## Features
 
-- 🌿 **Pure Semantic HTML**: Zero default CSS classes (no `.wtf-form` or `.wtf-form-input`) and absolutely no predefined stylesheets or styles.
+- 🌿 **Pure Semantic HTML**: Generates clean, accessible, pure semantic HTML forms with **no CSS styles or default classes included for now** (styling-free and class-free by design).
 - 📦 **Flat & Wrapper-Free**: Labels and inputs are rendered directly next to each other in a flat HTML structure with **no wrapper `<div>` elements** (including checkboxes and radios).
 - 🔐 **Standard HTML5 Self-Closing Syntax**: Standard self-closing formatting (` />`) for all void tags like `<input>` (text, checkbox, radio, submit, reset, hidden).
 - 🧩 **`<fieldset>` Grouping**: Embed `Fieldset = true` inside `wtf.FormInfo` to wrap your fields in a `<fieldset>` container, keeping action controls (submit/reset) clean and outside.
@@ -265,7 +265,7 @@ type FormFieldInfo struct {
 
 ## Styling & Layout Control
 
-By default, `go-wtf` generates a flat, pure HTML output containing no styling or classes at all, returning standard elements (such as `  <label for="...">` and `  <input type="..." />`) under standard `2-space` prefixes.
+By default, `go-wtf` generates flat, pure, semantic HTML forms containing no styling or classes at all, returning standard elements (such as `  <label for="...">` and `  <input type="..." />`) under standard `2-space` prefixes. **No CSS is included in the package for now.**
 
 This allows you to style your forms entirely using modern utility-first CSS frameworks like **Tailwind CSS**, standard CSS, or layouts by targeting the raw tag names or by applying custom classes directly in struct tags:
 
@@ -301,6 +301,31 @@ go run ./example/
 
 ---
 
+## Roadmap
+
+We are actively expanding `go-wtf` to make it the most powerful and seamless form renderer in the Go ecosystem. Below is our path forward:
+
+- ❌ **Inline Validation & Error Rendering**: Enable registering error maps (e.g. `map[string]string` or `map[string][]string`) and auto-render matching inline `<span class="error">...</span>` validation tags.
+- ❌ **Struct Validation Integration**: Seamless integration with validation struct tag parsers like `go-playground/validator` (e.g. mapping `binding:"required,email"` automatically to inline attributes and custom messages).
+- ❌ **Request Binding & Decoding**: An automated form decoder (similar to `gorilla/schema`) to populate incoming request form data directly back into Go struct instances with 1-line calls.
+- ❌ **Custom Widget Templates**: Allow developers to register custom templates or template fragments for rendering specific fields (e.g. rich text editors or custom date pickers).
+- ❌ **Translation / i18n**: Support localized error feedback, label translation, and placeholder bundles.
+
+---
+
+## Contributing
+
+Contributions are welcome! If you find a bug or want to propose a new feature, feel free to open an issue or submit a pull request:
+
+1. Fork the repository.
+2. Create a new feature branch (`git checkout -b feature/cool-new-thing`).
+3. Commit your changes (`git commit -m "Add some cool thing"`).
+4. Verify all tests pass (`go test -v ./...` and `go vet ./...`).
+5. Push to your branch (`git push origin feature/cool-new-thing`).
+6. Create a Pull Request.
+
+---
+
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
