@@ -80,7 +80,7 @@ func renderForm(fields []formField, r *FormRenderer) string {
 	return b.String()
 }
 
-// renderField renders a single form field wrapped in a form group div.
+// renderField renders a single form field directly without any wrapper div.
 func renderField(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
@@ -92,9 +92,6 @@ func renderField(f formField, r *FormRenderer) string {
 		b.WriteString(renderCheckbox(f, r))
 		return b.String()
 	}
-
-	// Wrap in form group
-	fmt.Fprintf(&b, "  <div>\n")
 
 	// Label
 	b.WriteString(renderLabel(f, r))
@@ -111,14 +108,13 @@ func renderField(f formField, r *FormRenderer) string {
 		b.WriteString(renderInput(f, r))
 	}
 
-	b.WriteString("  </div>\n")
 	return b.String()
 }
 
 // renderLabel renders a <label> element for a field.
 func renderLabel(f formField, r *FormRenderer) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, `    <label for="%s">%s`,
+	fmt.Fprintf(&b, `  <label for="%s">%s`,
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Label))
 	if f.Required {
@@ -131,8 +127,7 @@ func renderLabel(f formField, r *FormRenderer) string {
 // renderInput renders a standard <input> element.
 func renderInput(f formField, r *FormRenderer) string {
 	var b strings.Builder
-
-	fmt.Fprintf(&b, `    <input type="%s" id="%s" name="%s"`,
+	fmt.Fprintf(&b, `  <input type="%s" id="%s" name="%s"`,
 		html.EscapeString(f.Type),
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Name))
@@ -181,7 +176,7 @@ func renderInput(f formField, r *FormRenderer) string {
 func renderTextarea(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, `    <textarea id="%s" name="%s"`,
+	fmt.Fprintf(&b, `  <textarea id="%s" name="%s"`,
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Name))
 
@@ -220,7 +215,7 @@ func renderTextarea(f formField, r *FormRenderer) string {
 func renderSelect(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, `    <select id="%s" name="%s"`,
+	fmt.Fprintf(&b, `  <select id="%s" name="%s"`,
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Name))
 
@@ -246,22 +241,22 @@ func renderSelect(f formField, r *FormRenderer) string {
 
 	// Add a default empty option if not required to have a value
 	if !f.Required {
-		fmt.Fprintf(&b, `      <option value="">-- Select %s --</option>`+"\n", html.EscapeString(f.Label))
+		fmt.Fprintf(&b, `    <option value="">-- Select %s --</option>`+"\n", html.EscapeString(f.Label))
 	}
 
 	for _, opt := range f.Options {
 		if opt.Selected {
-			fmt.Fprintf(&b, `      <option value="%s" selected>%s</option>`+"\n",
+			fmt.Fprintf(&b, `    <option value="%s" selected>%s</option>`+"\n",
 				html.EscapeString(opt.Value),
 				html.EscapeString(opt.Label))
 		} else {
-			fmt.Fprintf(&b, `      <option value="%s">%s</option>`+"\n",
+			fmt.Fprintf(&b, `    <option value="%s">%s</option>`+"\n",
 				html.EscapeString(opt.Value),
 				html.EscapeString(opt.Label))
 		}
 	}
 
-	b.WriteString("    </select>\n")
+	b.WriteString("  </select>\n")
 	return b.String()
 }
 
@@ -269,10 +264,7 @@ func renderSelect(f formField, r *FormRenderer) string {
 func renderCheckbox(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "  <div>\n")
-	fmt.Fprintf(&b, "    <div>\n")
-
-	fmt.Fprintf(&b, `      <input type="checkbox" id="%s" name="%s"`,
+	fmt.Fprintf(&b, `  <input type="checkbox" id="%s" name="%s"`,
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Name))
 
@@ -296,12 +288,10 @@ func renderCheckbox(f formField, r *FormRenderer) string {
 
 	b.WriteString(" value=\"true\">\n")
 
-	fmt.Fprintf(&b, `      <label for="%s">%s</label>`+"\n",
+	fmt.Fprintf(&b, `  <label for="%s">%s</label>`+"\n",
 		html.EscapeString(f.ID),
 		html.EscapeString(f.Label))
 
-	b.WriteString("    </div>\n")
-	b.WriteString("  </div>\n")
 	return b.String()
 }
 
@@ -309,19 +299,13 @@ func renderCheckbox(f formField, r *FormRenderer) string {
 func renderRadio(f formField, r *FormRenderer) string {
 	var b strings.Builder
 
-	fmt.Fprintf(&b, "  <div>\n")
-
 	// Label for the group
 	b.WriteString(renderLabel(f, r))
-
-	fmt.Fprintf(&b, "    <div>\n")
 
 	for i, opt := range f.Options {
 		optID := fmt.Sprintf("%s-%d", f.ID, i)
 
-		fmt.Fprintf(&b, "      <div>\n")
-
-		fmt.Fprintf(&b, `        <input type="radio" id="%s" name="%s" value="%s"`,
+		fmt.Fprintf(&b, `  <input type="radio" id="%s" name="%s" value="%s"`,
 			html.EscapeString(optID),
 			html.EscapeString(f.Name),
 			html.EscapeString(opt.Value))
@@ -345,15 +329,11 @@ func renderRadio(f formField, r *FormRenderer) string {
 		}
 		b.WriteString(">\n")
 
-		fmt.Fprintf(&b, `        <label for="%s">%s</label>`+"\n",
+		fmt.Fprintf(&b, `  <label for="%s">%s</label>`+"\n",
 			html.EscapeString(optID),
 			html.EscapeString(opt.Label))
-
-		b.WriteString("      </div>\n")
 	}
 
-	b.WriteString("    </div>\n")
-	b.WriteString("  </div>\n")
 	return b.String()
 }
 
